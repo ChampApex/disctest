@@ -552,15 +552,15 @@
             let primaryType = Object.keys(totalScores).reduce((a, b) => totalScores[a] > totalScores[b] ? a : b);
 
             let totalDiffSum = 0;
-            let countGreaterThan2 = 0;
+            let countGreaterThan1 = 0;
             ['D', 'I', 'S', 'C'].forEach(k => {
                 let diff = Math.abs(extScores[k] - intScores[k]);
                 totalDiffSum += diff;
-                if (diff > 2) {
-                    countGreaterThan2++;
+                if (diff > 1) {
+                    countGreaterThan1++;
                 }
             });
-            let isChameleon = (totalDiffSum >= 6 && countGreaterThan2 >= 2);
+            let isChameleon = (totalDiffSum >= 6 && countGreaterThan1 >= 2);
 
             const userName = document.getElementById('user-name').value.trim();
             const userPhone = document.getElementById('user-phone').value.trim();
