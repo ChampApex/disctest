@@ -553,12 +553,12 @@
 
             // 【已修正變色龍判定邏輯：總分差 >= 6 且 至少有 2 個維度分差 > 3】
             let totalDiffSum = 0;
-            let countGreaterThan3 = 0;
+            let countGreaterThan2 = 0;
             ['D', 'I', 'S', 'C'].forEach(k => {
                 let diff = Math.abs(extScores[k] - intScores[k]);
                 totalDiffSum += diff;
-                if (diff > 3) {
-                    countGreaterThan3++;
+                if (diff > 2) {
+                    countGreaterThan2++;
                 }
             });
             let isChameleon = (totalDiffSum >= 6 && countGreaterThan3 >= 2);
