@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DISC 性格與職涯潛能深度解析</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .touch-target {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        @media print {
+            body { background-color: #ffffff; }
+            no-print, #action-buttons-section, footer { display: none !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- 主容器 -->
+    <main class="max-w-2xl w-full mx-auto p-4 sm:p-6 flex-grow mb-12">
+        
+        <!-- 頁面 1：教程與個人資料 -->
+        <section id="step-intro" class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-6">
+            <div class="text-center space-y-2">
+                <span class="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">專業版評估</span>
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-800">DISC 行為風格與職涯潛能測試</h1>
+                <p class="text-sm text-slate-500">透過多維度解析，發掘您的天賦優勢與最契合的專業發展路徑</p>
+            </div>
+
+            <!-- 用戶選填資料 -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
+                <h3 class="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                    <span>📋 受試者基本資料</span>
+                    <span class="text-xs font-normal text-slate-400">(選填，用於報告與紀錄)</span>
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">您的稱呼 / 姓名</label>
+                        <input type="text" id="user-name" placeholder="例如：Alex / 張先生" class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">聯絡電話</label>
+                        <input type="tel" id="user-phone" placeholder="例如：9123 4567" class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-slate-600 mb-1">電郵地址 (若需記錄與備份)</label>
+                        <input type="email" id="user-email" placeholder="例如：alex@example.com" class="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 測驗說明與教程 -->
+            <div class="space-y-3 text-sm text-slate-600 leading-relaxed bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                <h3 class="font-bold text-blue-900 flex items-center gap-1.5">
+                    <span>💡 測驗作答說明</span>
+                </h3>
+                <ul class="list-disc list-inside space-y-1.5 text-slate-700">
+                    <li>本測驗共包含 <span class="font-semibold text-blue-800">12 組</span> 行為形容詞選項。</li>
+                    <li>請在每一組中，憑直覺選出 **1 個最像自己** 的選項（+1分），以及 **1 個最不像自己** 的選項（內在扣分）。</li>
+                    <li>不需要過度思考「別人會怎麼看」，請依據您在工作與生活中的真實直覺作答。</li>
+                </ul>
+            </div>
+
+            <button onclick="startTest()" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 transition-all touch-target cursor-pointer">
+                開始進行測驗 →
+            </button>
+        </section>
+
+        <!-- 頁面 2：測驗作答區 -->
+        <section id="step-quiz" class="hidden space-y-6">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 sticky top-4 z-10">
+                <div class="flex justify-between items-center mb-2">
+                    <span id="progress-text" class="text-xs font-bold text-blue-600 uppercase tracking-wider">題目 1 / 12</span>
+                    <span id="progress-percent" class="text-xs font-semibold text-slate-400">8%</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300 rounded-full" style="width: 8%;"></div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <span class="text-xs font-semibold text-slate-400">請選出符合特質的選項</span>
+                    <h2 id="question-title" class="text-lg sm:text-xl font-bold text-slate-800 mt-1">題目載入中...</h2>
+                </div>
+
+                <div class="space-y-3" id="options-container"></div>
+
+                <div id="error-msg" class="hidden text-rose-500 text-xs font-medium text-center">
+                    ⚠️ 請先選擇「最像」與「最不像」各一個選項，再進入下一題。
+                </div>
+
+                <div class="flex gap-3 pt-4 border-t border-slate-100">
+                    <button id="prev-btn" onclick="prevQuestion()" class="hidden flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-all touch-target cursor-pointer">
+                        ← 上一題
+                    </button>
+                    <button id="next-btn" onclick="nextQuestion()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all touch-target cursor-pointer">
+                        下一題 →
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 頁面 3：結果報告區 -->
+        <section id="step-result" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-6">
+                <div class="text-center space-y-2 border-b border-slate-100 pb-6">
+                    <span class="inline-block bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">評估報告已完成</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-800" id="result-user-title">受試者 DISC 專業分析</h2>
+                    <p class="text-sm text-slate-500" id="result-meta-info">評估時間：2026年</p>
+                </div>
+
+                <!-- 折線圖表與分數比對 -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">📈 DISC 三維度得分趨勢（折線圖）</h3>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex justify-center">
+                        <div class="w-full max-w-lg h-72 sm:h-80">
+                            <canvas id="discLineChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-600">
+                        <div class="bg-blue-50 p-3 rounded-lg border border-blue-100 space-y-1">
+                            <span class="font-bold text-blue-800 block">🔵 外在得分（正常表現）</span>
+                            <p>日常工作與社交環境中，因應外界期待調整的應變風格。</p>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-lg border border-purple-100 space-y-1">
+                            <span class="font-bold text-purple-800 block">🟣 內在得分（受壓情況）</span>
+                            <p>底分 6 分扣減。在高壓或疲憊時最真實展現的原生風格。</p>
+                        </div>
+                        <div class="bg-emerald-50 p-3 rounded-lg border border-emerald-100 space-y-1">
+                            <span class="font-bold text-emerald-800 block">🟢 綜合得分（真實特質）</span>
+                            <p>結合外在調節與內在原生的綜合評估結果。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 變色龍特徵分析 (高標判定條件) -->
+                <div id="chameleon-section" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-4 sm:p-5 space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🦎</span>
+                        <h4 class="font-bold text-amber-900 text-sm sm:text-base">變色龍特徵解讀（高適應型）</h4>
+                    </div>
+                    <p class="text-xs sm:text-sm text-amber-800 leading-relaxed">
+                        您的外在得分與內在得分展現出顯著的高動態落差（總分差達標且具備多項顯著落差），這代表您具備極高的角色適應力與環境調節能力（變色龍特徵）。您能高度因應不同任務與人群需求切換行為模式，但也需留意精力消耗。
+                    </p>
+                </div>
+
+                <!-- DISC 步調與導向分類說明 -->
+                <div class="space-y-4 pt-4 border-t border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">🧭 DISC 行為特質維度矩陣（步調與導向）</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div class="bg-rose-50/70 p-3.5 rounded-xl border border-rose-100 space-y-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-rose-900 text-sm">D 主導型（Dominance）</span>
+                                <span class="bg-rose-200 text-rose-800 px-2 py-0.5 rounded text-[10px] font-bold">快步調 ⚡ 對事 🎯</span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed">開拓者，強調結果與效率。行動迅速、果斷直接，敢於冒險與接下掌控權。</p>
+                        </div>
+                        <div class="bg-amber-50/70 p-3.5 rounded-xl border border-amber-100 space-y-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-amber-900 text-sm">I 影響型（Influence）</span>
+                                <span class="bg-amber-200 text-amber-800 px-2 py-0.5 rounded text-[10px] font-bold">快步調 ⚡ 對人 🤝</span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed">社交者，強調熱情與影響力。善於激勵團隊、建立關係，表達力與吸引力極強。</p>
+                        </div>
+                        <div class="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-100 space-y-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-emerald-900 text-sm">S 穩健型（Steadiness）</span>
+                                <span class="bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-bold">慢步調 🐢 對人 🤝</span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed">支持者，強調穩定與和諧。腳踏實地、極具同理心與耐心，是團隊最堅實的基石。</p>
+                        </div>
+                        <div class="bg-indigo-50/70 p-3.5 rounded-xl border border-indigo-100 space-y-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-indigo-900 text-sm">C 分析型（Conscientiousness）</span>
+                                <span class="bg-indigo-200 text-indigo-800 px-2 py-0.5 rounded text-[10px] font-bold">慢步調 🐢 對事 🎯</span>
+                            </div>
+                            <p class="text-slate-600 leading-relaxed">思考者，強調品質與精準。注重邏輯細節與制度規範，追求高標準與客觀事實。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 類型深度解析 -->
+                <div class="space-y-4 pt-4 border-t border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">🧬 您的核心性格特質解析</h3>
+                    <div id="type-analysis-content" class="space-y-4 text-sm text-slate-700"></div>
+                </div>
+
+                <!-- 職業推薦 -->
+                <div class="space-y-4 pt-4 border-t border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">🎯 契合職涯發展與優勢推薦</h3>
+                    <div id="career-recommendations" class="space-y-4"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 按鈕操作區 -->
+        <section id="action-buttons-section" class="hidden mt-6">
+            <div class="bg-white rounded-2xl shadow-xl p-4 sm:p-6 flex flex-col sm:flex-row gap-3">
+                <button onclick="downloadPDF()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md transition-all touch-target cursor-pointer flex justify-center items-center gap-2">
+                    📥 下載 / 列印 PDF 報告
+                </button>
+                <button id="email-btn" onclick="sendEmailReport()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md transition-all touch-target cursor-pointer flex justify-center items-center gap-2">
+                    📧 一鍵發送報告至 Email
+                </button>
+                <button onclick="resetTest()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-all touch-target cursor-pointer">
+                    重新填寫測驗
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 text-xs text-slate-400">
+        DISC 專業行為風格評估系統 &copy; 2026
+    </footer>
+
+    <script>
+        const GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbylTHN6-bL3VkrMM5CX8IG6AAm2mz-YxxnVqdzAdttN0zvHIuFocmGCZg5P0G3xCsZl/exec";
+
+        const rawQuestions = [
+            {
+                id: 1, title: "面對專案與任務推進時",
+                options: [
+                    { text: "果斷決策，追求直接見效", type: "D" },
+                    { text: "熱情感染，喜歡透過溝通推動", type: "I" },
+                    { text: "穩健踏實，注重步驟與和諧", type: "S" },
+                    { text: "嚴謹細緻，確保合規與精準", type: "C" }
+                ]
+            },
+            {
+                id: 2, title: "當團隊面臨突發挑戰時",
+                options: [
+                    { text: "迅速掌控大局，帶頭迎難而上", type: "D" },
+                    { text: "鼓舞士氣，用正能量帶動大家", type: "I" },
+                    { text: "冷靜支持，維護團隊情緒穩定", type: "S" },
+                    { text: "分析數據與風險，尋找根本原因", type: "C" }
+                ]
+            },
+            {
+                id: 3, title: "在處理日常工作與事務時",
+                options: [
+                    { text: "講求效率與最終結果", type: "D" },
+                    { text: "注重互動與人際連結", type: "I" },
+                    { text: "保持規律，重視長期信賴", type: "S" },
+                    { text: "追求高品質與完美細節", type: "C" }
+                ]
+            },
+            {
+                id: 4, title: "與他人意見不合時",
+                options: [
+                    { text: "堅持觀點，用邏輯與氣場說服", type: "D" },
+                    { text: "靈活協調，透過談笑化解分歧", type: "I" },
+                    { text: "傾聽包容，盡量避免正面衝突", type: "S" },
+                    { text: "提出事實依據與客觀規則佐證", type: "C" }
+                ]
+            },
+            {
+                id: 5, title: "您最習慣的工作風格是",
+                options: [
+                    { text: "主導方向，掌握主導權", type: "D" },
+                    { text: "活躍多變，充滿社交與創意", type: "I" },
+                    { text: "循序漸進，安穩且有條不紊", type: "S" },
+                    { text: "按部就班，遵循標準化流程", type: "C" }
+                ]
+            },
+            {
+                id: 6, title: "在人際交往中，您傾向於",
+                options: [
+                    { text: "直言不諱，高效溝通", type: "D" },
+                    { text: "熱情外向，廣結善緣", type: "I" },
+                    { text: "真誠體貼，溫和陪伴", type: "S" },
+                    { text: "保持專業，注重分寸", type: "C" }
+                ]
+            },
+            {
+                id: 7, title: "面對壓力與緊湊死線時",
+                options: [
+                    { text: "更加緊迫，全力衝刺達標", type: "D" },
+                    { text: "尋求夥伴支持，保持樂觀", type: "I" },
+                    { text: "默默承受，堅持完成手頭任務", type: "S" },
+                    { text: "加倍檢查，避免出現任何疏失", type: "C" }
+                ]
+            },
+            {
+                id: 8, title: "您對新環境或新規定的態度",
+                options: [
+                    { text: "勇於開創，視為展現能力的機會", type: "D" },
+                    { text: "充滿好奇，樂於探索新可能", type: "I" },
+                    { text: "需要適應期，偏好熟悉的節奏", type: "S" },
+                    { text: "評估合理性，審慎評估風險", type: "C" }
+                ]
+            },
+            {
+                id: 9, title: "在團隊中，他人常形容您是",
+                options: [
+                    { text: "有魄力、目標清晰的領導者", type: "D" },
+                    { text: "有魅力、善於炒熱氣氛的開心果", type: "I" },
+                    { text: "可靠、溫和且具同理心的好夥伴", type: "S" },
+                    { text: "專業、邏輯嚴謹的品質把關者", type: "C" }
+                ]
+            },
+            {
+                id: 10, title: "您在規劃目標時習慣",
+                options: [
+                    { text: "設定宏大遠景，追求突破性成果", type: "D" },
+                    { text: "結合團隊熱情，朝有趣方向進行", type: "I" },
+                    { text: "穩紮穩打，設定可落實的步驟", type: "S" },
+                    { text: "制定詳細規劃，確保萬無一失", type: "C" }
+                ]
+            },
+            {
+                id: 11, title: "在給予他人回饋時，您傾向",
+                options: [
+                    { text: "直截了當，點出核心與改進點", type: "D" },
+                    { text: "以鼓勵為主，展現親和力與他人連結", type: "I" },
+                    { text: "溫和委婉，顧及對方感受", type: "S" },
+                    { text: "客觀理性，依據標準條理說明", type: "C" }
+                ]
+            },
+            {
+                id: 12, title: "面對日常繁雜瑣事時",
+                options: [
+                    { text: "快速授權或高效處理，不糾結", type: "D" },
+                    { text: "容易感到沉悶，尋求新鮮感", type: "I" },
+                    { text: "耐心細致，默默將事情做好", type: "S" },
+                    { text: "井然有序，分類歸納做到極致", type: "C" }
+                ]
+            }
+        ];
+
+        const careerData = {
+            D: {
+                title: "D 型（Dominance 主導型 / 開拓者）",
+                subtitle: "快步調 ⚡ 對事導向 🎯",
+                strengths: ["目標導向、決策果斷、抗壓性強、勇於開拓新局。", "面對挑戰時能迅速凝聚方向，具備強大執行力。"],
+                weaknesses: ["容易過於急躁、給人壓迫感、較缺乏耐心傾聽他人意見。", "面對細節事務時較容易失去耐性。"],
+                cooperation: ["溝通時直奔重點，提供數據與結果導向的方案，避免過多冗長細節。"],
+                careers: [
+                    { name: "企業家 / 創辦人", desc: "發揮卓越的宏觀視野與風險承擔力，帶領組織開創全新商業版圖。" },
+                    { name: "管理層 / 企業高管", desc: "主導組織戰略制定與資源調配，帶領團隊高效達成關鍵商業指標。" },
+                    { name: "專案總監", desc: "掌控大型項目的推進節奏與核心決策，確保專案如期高效交付。" },
+                    { name: "律師", desc: "發揮邏輯辯證與果斷決斷力，在法庭與談判桌上據理力爭。" },
+                    { name: "營業主管", desc: "引領業務團隊衝刺銷售目標，制定激勵機制與市場開拓策略。" }
+                ]
+            },
+            I: {
+                title: "I 型（Influence 影響型 / 社交者）",
+                subtitle: "快步調 ⚡ 對人導向 🤝",
+                strengths: ["熱情感染力強、善於建立人際網路、表達力佳、具備高度社交天賦。", "能快速炒熱氣氛並激發團隊熱情。"],
+                weaknesses: ["容易注重細節不夠、隨興、對後續長期跟進較缺乏持久度。", "有時過於重視人際和諧而忽略客觀數據。"],
+                cooperation: ["給予充足的發揮空間與正面肯定，建立輕鬆愉快的溝通氛圍。"],
+                careers: [
+                    { name: "公關管理", desc: "運用出色的溝通魅力與危機處理能力，建立良好的公眾形象與媒體關係。" },
+                    { name: "設計總監", desc: "結合美學與創新思維，帶領創意團隊打造引人入勝的視覺與品牌體驗。" },
+                    { name: "藝術家", desc: "透過強烈的個人情感與感染力，創作觸動人心的藝術作品。" },
+                    { name: "客戶服務", desc: "以親切熱忱的態度服務顧客，建立深厚的客戶信任與品牌好感度。" },
+                    { name: "銷售員", desc: "發揮頂尖的說服力與人際魅力，精準掌握客戶需求達成交易。" }
+                ]
+            },
+            S: {
+                title: "S 型（Steadiness 穩健型 / 支持者）",
+                subtitle: "慢步調 🐢 對人導向 🤝",
+                strengths: ["同理心強、極具耐心、忠誠度高、善於傾聽與長期關係維繫。", "是團隊中最穩定且可靠的溫暖支柱。"],
+                weaknesses: ["較害怕衝突與突發改變、決策較為猶豫、容易委屈自己配合他人。", "面對快速變動的環境需要較長的適應期。"],
+                cooperation: ["保持溫和友善的態度，給予足夠的適應時間與安全感，避免過度急躁施壓。"],
+                careers: [
+                    { name: "人力資源（福利及關係）", desc: "關注員工身心與職場滿意度，打造和諧穩固的內部組織文化。" },
+                    { name: "心理諮商", desc: "以深厚的同理心與耐性傾聽陪伴，協助個案梳理心結與走出低谷。" },
+                    { name: "教師", desc: "細心照顧每位學員的學習步調，循循善誘建立長期的信任與成長。" },
+                    { name: "跨部門協調", desc: "發揮強大協調力與包容心，化解不同部門間的分歧促進團隊合作。" },
+                    { name: "客戶關係 / 售後服務", desc: "提供長期細緻的溫暖關懷與後續跟進，建立極高的客戶黏著度。" }
+                ]
+            },
+            C: {
+                title: "C 型（Conscientiousness 服從型 / 分析者）",
+                subtitle: "慢步調 🐢 對事導向 🎯",
+                strengths: ["邏輯嚴密、注重細節、尊重規則、追求高品質與精準度。", "善於處理複雜數據與制度把關。"],
+                weaknesses: ["容易陷入過度思考（分析癱瘓）、追求完美而延誤進度、過度挑剔。", "面對模糊或變動性高的任務時容易感到焦慮。"],
+                cooperation: ["提供充足的事實依據、客觀數據與清晰條款，以專業與邏輯建立信任。"],
+                careers: [
+                    { name: "軟體工程", desc: "運用嚴謹的邏輯思維與架構規劃，打造高效穩定的系統程式碼。" },
+                    { name: "審查員", desc: "秉持客觀公正與高度細心，嚴格審核各項法規、條款與品質標準。" },
+                    { name: "藥劑師", desc: "以一絲不苟的精準度核對藥品與劑量，確保用藥絕對安全無誤。" },
+                    { name: "系統管理", desc: "維護 IT 基礎設施的安全穩定，落實高標準的資安與備份機制。" },
+                    { name: "精算師", desc: "透過大數據與精確數學模型評估風險，提供科學的財務與保險決策依據。" }
+                ]
+            }
+        };
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let userSelections = {};
+        let lineChartInstance = null;
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function startTest() {
+            shuffledQuestions = rawQuestions.map(q => ({
+                ...q,
+                options: shuffleArray(q.options)
+            }));
+            currentQuestionIndex = 0;
+            userSelections = {};
+
+            document.getElementById('step-intro').classList.add('hidden');
+            document.getElementById('step-result').classList.add('hidden');
+            document.getElementById('action-buttons-section').classList.add('hidden');
+            document.getElementById('step-quiz').classList.remove('hidden');
+            
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = shuffledQuestions[currentQuestionIndex];
+            const total = shuffledQuestions.length;
+            
+            document.getElementById('progress-text').innerText = `題目 ${currentQuestionIndex + 1} / ${total}`;
+            const percent = Math.round(((currentQuestionIndex + 1) / total) * 100);
+            document.getElementById('progress-percent').innerText = `${percent}%`;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+
+            document.getElementById('question-title').innerText = `${currentQuestionIndex + 1}. ${q.title}`;
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            const currentAns = userSelections[q.id] || { most: null, least: null };
+
+            q.options.forEach((opt) => {
+                const isMost = currentAns.most === opt.type;
+                const isLeast = currentAns.least === opt.type;
+
+                const div = document.createElement('div');
+                div.className = `p-4 rounded-xl border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+                    isMost ? 'border-blue-500 bg-blue-50/50 ring-2 ring-blue-500/20' : 
+                    isLeast ? 'border-purple-500 bg-purple-50/50 ring-2 ring-purple-500/20' : 
+                    'border-slate-200 bg-white hover:border-slate-300'
+                }`;
+
+                div.innerHTML = `
+                    <span class="text-sm font-medium text-slate-800 flex-grow">${opt.text}</span>
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                        <button type="button" onclick="selectOption(${q.id}, '${opt.type}', 'most')" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all touch-target cursor-pointer ${
+                            isMost ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }">
+                            最像 (+1)
+                        </button>
+                        <button type="button" onclick="selectOption(${q.id}, '${opt.type}', 'least')" class="px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all touch-target cursor-pointer ${
+                            isLeast ? 'bg-purple-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }">
+                            最不像 (-1)
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            const prevBtn = document.getElementById('prev-btn');
+            if (currentQuestionIndex > 0) prevBtn.classList.remove('hidden');
+            else prevBtn.classList.add('hidden');
+
+            const nextBtn = document.getElementById('next-btn');
+            if (currentQuestionIndex === total - 1) nextBtn.innerText = "查看評估報告 📊";
+            else nextBtn.innerText = "下一題 →";
+
+            document.getElementById('error-msg').classList.add('hidden');
+        }
+
+        function selectOption(qId, type, category) {
+            if (!userSelections[qId]) userSelections[qId] = { most: null, least: null };
+
+            if (category === 'most') {
+                if (userSelections[qId].least === type) userSelections[qId].least = null;
+                userSelections[qId].most = userSelections[qId].most === type ? null : type;
+            } else {
+                if (userSelections[qId].most === type) userSelections[qId].most = null;
+                userSelections[qId].least = userSelections[qId].least === type ? null : type;
+            }
+
+            renderQuestion();
+        }
+
+        function nextQuestion() {
+            const q = shuffledQuestions[currentQuestionIndex];
+            const ans = userSelections[q.id];
+
+            if (!ans || !ans.most || !ans.least) {
+                document.getElementById('error-msg').classList.remove('hidden');
+                return;
+            }
+
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                calculateAndShowResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function calculateAndShowResults() {
+            let extScores = { D: 0, I: 0, S: 0, C: 0 };
+            let intNegScores = { D: 0, I: 0, S: 0, C: 0 };
+
+            Object.values(userSelections).forEach(ans => {
+                if (ans.most) extScores[ans.most]++;
+                if (ans.least) intNegScores[ans.least]++;
+            });
+
+            let intScores = {
+                D: Math.max(0, 6 - intNegScores.D),
+                I: Math.max(0, 6 - intNegScores.I),
+                S: Math.max(0, 6 - intNegScores.S),
+                C: Math.max(0, 6 - intNegScores.C)
+            };
+
+            let totalScores = {
+                D: extScores.D + intScores.D,
+                I: extScores.I + intScores.I,
+                S: extScores.S + intScores.S,
+                C: extScores.C + intScores.C
+            };
+
+            let primaryType = Object.keys(totalScores).reduce((a, b) => totalScores[a] > totalScores[b] ? a : b);
+
+            // 【全新高標準變色龍判定邏輯】
+            // 1. 總分差須達 6 分以上
+            // 2. 須有至少 2 個維度的個別分差大於 3 分 (即 diff >= 4)
+            let totalDiffSum = 0;
+            let countGreaterThan3 = 0;
+            ['D', 'I', 'S', 'C'].forEach(k => {
+                let diff = Math.abs(extScores[k] - intScores[k]);
+                totalDiffSum += diff;
+                if (diff > 2) {
+                    countGreaterThan2++;
+                }
+            });
+            let isChameleon = (totalDiffSum >= 6 && countGreaterThan3 >= 2);
+
+            const userName = document.getElementById('user-name').value.trim();
+            const userPhone = document.getElementById('user-phone').value.trim();
+            const userEmail = document.getElementById('user-email').value.trim();
+            const titlePrefix = userName ? `${userName} 的` : '';
+            
+            document.getElementById('result-user-title').innerText = `${titlePrefix}DISC 行為風格分析報告`;
+            document.getElementById('result-meta-info').innerText = `評估日期：2026年 | 核心主導類型：${primaryType} 型`;
+
+            const chameleonSec = document.getElementById('chameleon-section');
+            if (isChameleon) chameleonSec.classList.remove('hidden');
+            else chameleonSec.classList.add('hidden');
+
+            const careerObj = careerData[primaryType];
+            const analysisContainer = document.getElementById('type-analysis-content');
+            analysisContainer.innerHTML = `
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                    <h4 class="font-bold text-slate-800 text-base">${careerObj.title}</h4>
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-semibold">${careerObj.subtitle}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                        <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-1">
+                            <span class="font-bold text-emerald-700 text-xs block">✨ 優勢與強項</span>
+                            <ul class="list-disc list-inside text-xs text-slate-600 space-y-1">
+                                ${careerObj.strengths.map(s => `<li>${s}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-1">
+                            <span class="font-bold text-rose-700 text-xs block">⚠️ 潛在盲點 / 弱項</span>
+                            <ul class="list-disc list-inside text-xs text-slate-600 space-y-1">
+                                ${careerObj.weaknesses.map(w => `<li>${w}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-1">
+                            <span class="font-bold text-blue-700 text-xs block">🤝 最佳合作與溝通方式</span>
+                            <p class="text-xs text-slate-600">${careerObj.cooperation[0]}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const careerRecContainer = document.getElementById('career-recommendations');
+            careerRecContainer.innerHTML = `
+                <div class="space-y-3">
+                    <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-100 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-blue-900 text-sm sm:text-base">專屬推薦之 ${primaryType} 型契合職涯方向</h4>
+                            <span class="bg-blue-600 text-white text-xs font-semibold px-2.5 py-1 rounded-full">高度匹配</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                            ${careerObj.careers.map(c => `
+                                <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+                                    <h5 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                                        ${c.name}
+                                    </h5>
+                                    <p class="text-xs text-slate-600 leading-relaxed">${c.desc}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('step-quiz').classList.add('hidden');
+            document.getElementById('step-result').classList.remove('hidden');
+            document.getElementById('action-buttons-section').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            renderLineChart(extScores, intScores, totalScores);
+
+            // 自動將資料與 Email 發送通知傳送至 Google Sheet
+            sendDataToGoogleSheet({
+                timestamp: new Date().toLocaleString('zh-HK'),
+                name: userName || '匿名',
+                phone: userPhone || '未提供',
+                email: userEmail || '未提供',
+                extScores: JSON.stringify(extScores),
+                intScores: JSON.stringify(intScores),
+                totalScores: JSON.stringify(totalScores),
+                primaryType: primaryType,
+                isChameleon: isChameleon ? '是' : '否'
+            });
+        }
+
+        function renderLineChart(ext, intS, total) {
+            const ctx = document.getElementById('discLineChart').getContext('2d');
+            if (lineChartInstance) lineChartInstance.destroy();
+
+            lineChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['D (主導型)', 'I (影響型)', 'S (穩健型)', 'C (分析型)'],
+                    datasets: [
+                        {
+                            label: '外在得分（正常表現）',
+                            data: [ext.D, ext.I, ext.S, ext.C],
+                            borderColor: '#2563eb',
+                            backgroundColor: '#2563eb',
+                            borderWidth: 3,
+                            tension: 0.2,
+                            fill: false
+                        },
+                        {
+                            label: '內在得分（受壓情況）',
+                            data: [intS.D, intS.I, intS.S, intS.C],
+                            borderColor: '#9333ea',
+                            backgroundColor: '#9333ea',
+                            borderWidth: 3,
+                            tension: 0.2,
+                            fill: false
+                        },
+                        {
+                            label: '綜合得分（真實特質）',
+                            data: [total.D, total.I, total.S, total.C],
+                            borderColor: '#10b981',
+                            backgroundColor: '#10b981',
+                            borderWidth: 3,
+                            borderDash: [5, 5],
+                            tension: 0.2,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                        x: { grid: { color: '#f1f5f9' } }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { family: "'Noto Sans TC', sans-serif", size: 11 }, usePointStyle: true, padding: 12 }
+                        }
+                    }
+                }
+            });
+        }
+
+        function downloadPDF() {
+            window.print();
+        }
+
+        function sendEmailReport() {
+            const userEmail = document.getElementById('user-email').value.trim();
+            if (!userEmail || !userEmail.includes('@')) {
+                alert("⚠️ 請先在首頁或聯絡資訊中填寫正確的「電郵地址」，才能發送報告！");
+                return;
+            }
+
+            const btn = document.getElementById('email-btn');
+            btn.innerText = "發送中...";
+            btn.disabled = true;
+
+            const userName = document.getElementById('user-name').value.trim();
+            const userPhone = document.getElementById('user-phone').value.trim();
+            
+            fetch(GOOGLE_SHEET_WEBAPP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    timestamp: new Date().toLocaleString('zh-HK'),
+                    name: userName || '匿名',
+                    phone: userPhone || '未提供',
+                    email: userEmail,
+                    extScores: "已記錄",
+                    intScores: "已記錄",
+                    totalScores: "已記錄",
+                    primaryType: "報告補發",
+                    isChameleon: "查閱"
+                })
+            }).then(() => {
+                alert("✅ 報告已成功發送至您的 Email (" + userEmail + ")，請稍候查收！");
+                btn.innerText = "📧 已發送報告至 Email";
+            }).catch(err => {
+                console.error(err);
+                alert("❌ 發送失敗，請稍後再試。");
+                btn.innerText = "📧 一鍵發送報告至 Email";
+                btn.disabled = false;
+            });
+        }
+
+        function sendDataToGoogleSheet(payload) {
+            fetch(GOOGLE_SHEET_WEBAPP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                console.log("資料已成功傳送至 Google Sheet 並觸發 Email");
+            }).catch(err => {
+                console.error("發送至 Google Sheet 時發生錯誤：", err);
+            });
+        }
+
+        function resetTest() {
+            userSelections = {};
+            currentQuestionIndex = 0;
+            document.getElementById('user-name').value = '';
+            document.getElementById('user-phone').value = '';
+            document.getElementById('user-email').value = '';
+            document.getElementById('step-result').classList.add('hidden');
+            document.getElementById('action-buttons-section').classList.add('hidden');
+            document.getElementById('step-intro').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
