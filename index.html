@@ -146,7 +146,7 @@
                     </div>
                 </div>
 
-                <!-- 變色龍特徵分析 (高標判定條件) -->
+                <!-- 變色龍特徵分析 -->
                 <div id="chameleon-section" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-4 sm:p-5 space-y-2">
                     <div class="flex items-center gap-2">
                         <span class="text-lg">🦎</span>
@@ -551,7 +551,6 @@
 
             let primaryType = Object.keys(totalScores).reduce((a, b) => totalScores[a] > totalScores[b] ? a : b);
 
-            // 【已修正變色龍判定邏輯：總分差 >= 6 且 至少有 2 個維度分差 > 3】
             let totalDiffSum = 0;
             let countGreaterThan2 = 0;
             ['D', 'I', 'S', 'C'].forEach(k => {
@@ -561,7 +560,7 @@
                     countGreaterThan2++;
                 }
             });
-            let isChameleon = (totalDiffSum >= 6 && countGreaterThan3 >= 2);
+            let isChameleon = (totalDiffSum >= 6 && countGreaterThan2 >= 2);
 
             const userName = document.getElementById('user-name').value.trim();
             const userPhone = document.getElementById('user-phone').value.trim();
@@ -632,17 +631,20 @@
 
             renderLineChart(extScores, intScores, totalScores);
 
-            sendDataToGoogleSheet({
-                timestamp: new Date().toLocaleString('zh-HK'),
-                name: userName || '匿名',
-                phone: userPhone || '未提供',
-                email: userEmail || '未提供',
-                extScores: JSON.stringify(extScores),
-                intScores: JSON.stringify(intScores),
-                totalScores: JSON.stringify(totalScores),
-                primaryType: primaryType,
-                isChameleon: isChameleon ? '是' : '否'
-            });
+            // 【關鍵修復】：將 Google Sheet 請求改為背景非同步執行 (setTimeout 100ms)，完全不阻礙畫面渲染與圖表生成
+            setTimeout(() => {
+                sendDataToGoogleSheet({
+                    timestamp: new Date().toLocaleString('zh-HK'),
+                    name: userName || '匿名',
+                    phone: userPhone || '未提供',
+                    email: userEmail || '未提供',
+                    extScores: JSON.stringify(extScores),
+                    intScores: JSON.stringify(intScores),
+                    totalScores: JSON.stringify(totalScores),
+                    primaryType: primaryType,
+                    isChameleon: isChameleon ? '是' : '否'
+                });
+            }, 100);
         }
 
         function renderLineChart(ext, intS, total) {
@@ -758,17 +760,17 @@
             });
         }
 
-        function resetTest() {
-            userSelections = {};
-            currentQuestionIndex = 0;
-            document.getElementById('user-name').value = '';
-            document.getElementById('user-phone').value = '';
-            document.getElementById('user-email').value = '';
-            document.getElementById('step-result').classList.add('hidden');
-            document.getElementById('action-buttons-section').classList.add('hidden');
-            document.getElementById('step-intro').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    </script>
+    function resetTest() {
+        userSelections = {};
+        currentQuestionIndex = 0;
+        document.getElementById('user-name').value = '';
+        document.getElementById('user-phone').value = '';
+        document.getElementById('user-email').value = '';
+        document.getElementById('step-result').classList.add('hidden');
+        document.getElementById('action-buttons-section').classList.add('hidden');
+        document.getElementById('step-intro').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
 </body>
 </html>
